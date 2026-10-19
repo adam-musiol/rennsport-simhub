@@ -236,6 +236,7 @@ Rows refer to the plugin's status page (**Rennsport** in SimHub's left menu).
 | Symptom | Fix |
 |---|---|
 | No **Rennsport** entry in the left menu, but "Rennsport (API)" is in the game list | Open *Add/remove features*, find **Rennsport telemetry** and switch on **Show in left main menu**. |
+| Installer says `SimHub did not close` | SimHub may keep running in the tray. Close it from the tray icon (*Exit*) and run `install.cmd` again. |
 | No **Rennsport** page and no "Rennsport (API)" game in SimHub | Check that the plugin is enabled (SimHub *Settings → Plugins*) and the DLL is unblocked (step 4). Update SimHub to 9.13+. Restart SimHub. |
 | *Game API* is red or grey while the game runs | The game's UDP API is off. Repeat step 2 with the game closed, start the game and check the in-game telemetry option. |
 | *Game API* shows `3 InvalidPassword` | Set the same `accessPassword` in the game config and in *Settings → Game API → Password*, or leave the password empty so the plugin reads it from the game config. |
@@ -247,6 +248,28 @@ Rows refer to the plugin's status page (**Rennsport** in SimHub's left menu).
 | Simucube Tuner does not show *Simulator: Rennsport* | Restart Tuner after installing. If Tuner was updated, run `install.cmd` again. |
 | Tuner shows Rennsport but Telemetry FFB does nothing | SimHub must be running with the plugin enabled, and you must be on track. Enable *Telemetry Force-feedback* on Tuner's Wheelbase page. |
 | Shift lights never light up | Max / shift RPM come from the game's timing data (`CarLiveUpdate`, 4 Hz). They appear about a second after you get on track. |
+
+---
+
+## Updating
+
+Installing a new version over the old one is the update. You don't need to uninstall first.
+
+1. Download `RennsportSimHub-<version>.zip` from the [latest release](https://github.com/adam-musiol/rennsport-simhub/releases/latest) and extract the whole zip to a new folder.
+2. **Close Rennsport.**
+3. Double-click **`install.cmd`**. It closes SimHub (it asks first), replaces `RennsportPlugin.dll` and starts SimHub again. If Simucube Tuner is installed, it asks about Telemetry FFB again; answer the same as last time.
+
+What stays as it was:
+
+- the plugin settings,
+- the plugin's *Show in left main menu* switch and the selected game in SimHub,
+- the game config: the installer only checks that the UDP API is on, and keeps the backup from the first install.
+
+To see the installed version, right-click `RennsportPlugin.dll` in the SimHub folder and choose *Properties → Details*. *File version* shows it, for example `1.2.0.0`.
+
+**Manually:** close SimHub (tray icon → *Exit*), copy the new `RennsportPlugin.dll` over the old one in the SimHub folder, unblock it (see [step 4](#4-unblock-the-dll)) and start SimHub.
+
+> **After a Simucube Tuner update** (not a plugin update), run `install.cmd` again, because Tuner updates undo the Telemetry FFB change.
 
 ---
 
