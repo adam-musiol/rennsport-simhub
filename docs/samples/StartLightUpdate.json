@@ -1,0 +1,8 @@
+{
+  "messageType": "StartLightUpdate",
+  "time": 0,
+  "version": 1,
+  "data": {
+    "startLightCountdown": 0
+  }
+}

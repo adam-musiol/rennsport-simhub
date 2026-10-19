@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Test tool for the Simucube Tuner feed. The exe is deliberately named Rennsport.exe:
+       Tuner detects "the game" by process name. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- the linked plugin sources are written without nullable annotations -->
+    <Nullable>disable</Nullable>
+    <AssemblyName>Rennsport</AssemblyName>
+    <RootNamespace>TunerForzaTest</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- same encoder and parser as the SimHub plugin, so the test exercises the shipped code -->
+    <Compile Include="..\..\RennsportPlugin\ForzaBridge.cs" Link="Plugin\ForzaBridge.cs" />
+    <Compile Include="..\..\RennsportPlugin\MessageParser.cs" Link="Plugin\MessageParser.cs" />
+    <Compile Include="..\..\RennsportPlugin\Telemetry.cs" Link="Plugin\Telemetry.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+</Project>

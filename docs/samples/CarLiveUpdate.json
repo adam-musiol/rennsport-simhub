@@ -1,0 +1,83 @@
+{
+  "messageType": "CarLiveUpdate",
+  "time": 169.96144104003906,
+  "version": 1,
+  "data": {
+    "carNumber": 90,
+    "userId": "00000000-0000-0000-0000-000000000001",
+    "carId": "00000000-0000-0000-0000-000000000001",
+    "position": 1,
+    "completedLaps": 1,
+    "currentLap": {
+      "time": 21.380203247070312,
+      "sectors": []
+    },
+    "bestLap": {
+      "time": 134.65196228027344,
+      "sectors": [
+        57.4704475402832,
+        38.388275146484375,
+        38.793243408203125
+      ]
+    },
+    "lastLap": {
+      "time": 134.65196228027344,
+      "sectors": [
+        57.4704475402832,
+        38.388275146484375,
+        38.793243408203125
+      ]
+    },
+    "lapProgress": 0.1761353760957718,
+    "frontTireType": "0",
+    "rearTireType": "0",
+    "totalTime": 0,
+    "gap": 0,
+    "interval": 0,
+    "speed": -0.14118243753910065,
+    "engineRPM": 1225.1905517578125,
+    "inPitStatus": "NotInPit",
+    "disqualified": false,
+    "didNotFinish": false,
+    "didNotStart": false,
+    "pendingPenalties": [],
+    "servedPenalties": [
+      {
+        "penaltyReason": "DrivingOutsideOfTrackBounds",
+        "penaltyName": "BP_InvalidateCurrentLapTimePenalty_C"
+      },
+      {
+        "penaltyReason": "DrivingOutsideOfTrackBounds",
+        "penaltyName": "BP_InvalidateCurrentLapTimePenalty_C"
+      },
+      {
+        "penaltyReason": "DrivingOutsideOfTrackBounds",
+        "penaltyName": "BP_InvalidateCurrentLapTimePenalty_C"
+      }
+    ],
+    "sumTimePenaltiesAdded": 0,
+    "steeringInput": -0.001471400260925293,
+    "throttleInput": 0,
+    "brakeInput": 0,
+    "clutchInput": 0,
+    "gear": 2,
+    "barycentricCoordinates": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "isConnected": true,
+    "finshed": false,
+    "finished": false,
+    "currentFlag": "Green",
+    "maxEngineRPM": 8000,
+    "onWheelRPMLightsPct": 0,
+    "optimalShiftRPM": 7500,
+    "pitLimiter": false,
+    "absActive": false,
+    "tcActive": false,
+    "espActive": false,
+    "carLeft": -1,
+    "carRight": -1
+  }
+}

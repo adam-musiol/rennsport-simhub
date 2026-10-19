@@ -1,0 +1,11 @@
+{
+  "messageType": "GameplayStageInfoUpdate",
+  "time": 3.3467390537261963,
+  "version": 1,
+  "data": {
+    "contestName": "RENNSPORT",
+    "gameplayStageName": "Trening",
+    "track": "Autodromo Nazionale Monza (Road Course)",
+    "balanceOfPerformanceData": []
+  }
+}

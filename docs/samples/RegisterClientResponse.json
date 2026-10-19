@@ -1,0 +1,8 @@
+{
+  "messageType": "RegisterClientResponse",
+  "responseCode": 1,
+  "responseCodeString": "AlreadyRegistered",
+  "time": 0,
+  "version": 1,
+  "data": {}
+}

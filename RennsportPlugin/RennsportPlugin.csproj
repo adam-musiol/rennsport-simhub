@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>RennsportPlugin</AssemblyName>
+    <RootNamespace>RennsportPlugin</RootNamespace>
+    <Nullable>disable</Nullable>
+    <Version>1.1.0</Version>
+    <Product>Rennsport telemetry for SimHub</Product>
+    <Authors>Adam Musiol</Authors>
+    <Company>Adam Musiol</Company>
+    <!-- SimHub install folder: env var set by the SimHub installer, fallback to the default path -->
+    <SimHubDir Condition="'$(SimHubDir)' == ''">$(SIMHUB_INSTALL_PATH)</SimHubDir>
+    <SimHubDir Condition="'$(SimHubDir)' == ''">C:\Program Files (x86)\SimHub\</SimHubDir>
+    <SimHubDir Condition="!HasTrailingSlash('$(SimHubDir)')">$(SimHubDir)\</SimHubDir>
+    <!-- dotnet build -p:CopyToSimHub=true  => copy the DLL + PDB into the SimHub folder after build -->
+    <CopyToSimHub Condition="'$(CopyToSimHub)' == ''">false</CopyToSimHub>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- net48 targeting pack is not installed on this machine; this package provides it for dotnet build -->
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Everything below ships with SimHub, so never copy it to the output -->
+    <Reference Include="SimHub.Plugins"><HintPath>$(SimHubDir)SimHub.Plugins.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="GameReaderCommon"><HintPath>$(SimHubDir)GameReaderCommon.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="SimHub.Logging"><HintPath>$(SimHubDir)SimHub.Logging.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="log4net"><HintPath>$(SimHubDir)log4net.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Newtonsoft.Json"><HintPath>$(SimHubDir)Newtonsoft.Json.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="WoteverCommon"><HintPath>$(SimHubDir)WoteverCommon.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="System.Xaml" />
+  </ItemGroup>
+
+  <Target Name="CopyPluginToSimHub" AfterTargets="Build" Condition="'$(CopyToSimHub)' == 'true'">
+    <Copy SourceFiles="$(TargetPath);$(TargetDir)$(TargetName).pdb" DestinationFolder="$(SimHubDir)" />
+    <Message Importance="high" Text="Copied $(TargetFileName) to $(SimHubDir)" />
+  </Target>
+
+</Project>

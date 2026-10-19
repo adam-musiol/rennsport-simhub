@@ -1,0 +1,11 @@
+{
+  "messageType": "GameplayStageLiveUpdate",
+  "time": 169.96144104003906,
+  "version": 1,
+  "data": {
+    "timeLeft": 3433.38525390625,
+    "lapsLeft": -1,
+    "currentlyObservedCar": 90,
+    "bestSectors": []
+  }
+}

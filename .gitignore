@@ -1,0 +1,18 @@
+# build output
+bin/
+obj/
+.vs/
+*.user
+dist/
+
+# local recordings and captures (large, contain the player's name and account id)
+api*/
+capture*/
+*.bin
+
+# prebuilt local copy of rsudp
+/rsudp/
+
+# local notes and logs
+CLAUDE.md
+*.log
