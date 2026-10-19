@@ -58,7 +58,7 @@ All traffic stays on your PC (`127.0.0.1`). Nothing is sent over the network.
    - enable Rennsport's UDP API in the game config, keeping a backup as `BroadcastingSocket.json.bak`,
    - close SimHub if it is running (it asks first),
    - copy `RennsportPlugin.dll` into the SimHub folder (you get a UAC prompt if SimHub is in `Program Files`),
-   - if Simucube Tuner is installed, ask whether to enable its Telemetry FFB for Rennsport (see [Simucube Tuner](#simucube-tuner-telemetry-ffb)),
+   - *optional:* if Simucube Tuner is installed, ask whether to enable its Telemetry FFB for Rennsport. Answer **N** if you don't use Tuner's Telemetry FFB; everything else works without it (see [Simucube Tuner](#simucube-tuner-telemetry-ffb)),
    - start SimHub.
 4. Continue with **step 5** of the manual installation (enable the plugin and select the game in SimHub).
 
@@ -118,6 +118,10 @@ Choose **Rennsport (API)** as the current game in SimHub.
 
 Start Rennsport and **go on track**. Physics data is sent only while you are driving, not in menus. SimHub shows the game as running, and dashboards and LEDs come alive.
 
+### 8. Optional: Simucube Tuner Telemetry FFB
+
+Only if you have a Simucube wheelbase and want Tuner's *Telemetry Force-feedback* effects in Rennsport. Skip this step otherwise: SimHub, dashboards, LEDs and ShakeIt don't need it. See [Simucube Tuner](#simucube-tuner-telemetry-ffb).
+
 ---
 
 ## Checking that it works
@@ -167,6 +171,8 @@ Speed, RPM, max RPM, shift RPM, gear, throttle, brake, clutch, brake bias, fuel,
 
 ## Simucube Tuner (Telemetry FFB)
 
+**This part is optional.** You need it only for Tuner's Telemetry FFB; the rest of the plugin works without it.
+
 Simucube Tuner lists Rennsport but has no telemetry reader for it, so its *Telemetry Force-feedback* effects (road texture, cornering, ABS, RPM, gear change) stay inactive. The workaround:
 
 1. The installer changes the Rennsport entry in `<Tuner folder>\data\game_db.json` (default `C:\Program Files\SimucubeTuner`) to use Tuner's built-in **Forza** telemetry reader on `127.0.0.1:9877`. It also adds detection of `Rennsport.exe` and `Rennsport-Win64-Shipping.exe`. The stock file is backed up as `game_db.json.bak-rennsport`.
@@ -184,7 +190,7 @@ Notes:
 
 - Tuner shows *Car: Not supported*. This is expected, because the Forza format carries no car identity.
 - Rennsport does not report kerbs or surface rumble, and the axis directions are not verified yet. If *Cornering* pulls the wrong way or an effect feels wrong, lower or disable it in Tuner.
-- To skip this step, run `install.ps1 -SkipSimucube`, or set `FeedSimucube` to `false` (see Settings). `uninstall.cmd` restores Tuner's stock Rennsport entry.
+- To skip this step, answer **N** in the installer or run `install.ps1 -SkipSimucube`. Without the Tuner change, the plugin's small feed to `127.0.0.1:9877` simply goes unread; to turn it off completely, set `FeedSimucube` to `false` (see [Settings](#settings)). `uninstall.cmd` restores Tuner's stock Rennsport entry.
 
 **Manually:** with Tuner closed, open `data\game_db.json` in the Tuner folder as Administrator. Replace `"rennsport": { "name": "Rennsport" }` with the entry that `install.ps1` writes (search for `$TunerEntry` in the script).
 
