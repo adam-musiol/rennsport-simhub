@@ -60,7 +60,7 @@ All traffic stays on your PC (`127.0.0.1`). Nothing is sent over the network.
    - copy `RennsportPlugin.dll` into the SimHub folder (you get a UAC prompt if SimHub is in `Program Files`),
    - *optional:* if Simucube Tuner is installed, ask whether to enable its Telemetry FFB for Rennsport. Answer **N** if you don't use Tuner's Telemetry FFB; everything else works without it (see [Simucube Tuner](#simucube-tuner-telemetry-ffb)),
    - start SimHub.
-4. Continue with **step 5** of the manual installation (enable the plugin and select the game in SimHub).
+4. Continue with **step 5** of the manual installation (enable the plugin, show its page in the left menu and select the game in SimHub).
 
 Script options (PowerShell): `install.ps1 -SimHubPath "D:\SimHub" -SkipGameConfig -TunerPath "D:\SimucubeTuner" -SkipSimucube -NoStart`.
 
@@ -105,6 +105,7 @@ Files from a downloaded zip are marked as coming from the internet, and SimHub m
 ### 5. Start SimHub and enable the plugin
 
 - If SimHub shows **"New plugins have been detected!"**, enable **"Rennsport telemetry"** and confirm.
+- Show the plugin's page in the left menu: click **Add/remove features** (bottom of SimHub's left menu), find **Rennsport telemetry**, switch on **Show in left main menu** and click **Ok**. A **Rennsport** entry (speedometer icon) appears in the left menu. It is the plugin's status and settings page, see [Checking that it works](#checking-that-it-works).
 - Within a few seconds a new game called **"Rennsport (API)"** appears in SimHub's game list. The plugin creates it on its first start, in `%LOCALAPPDATA%\SimHub\ExternalSims\Definitions\Rennsport\`.
 
 ### 6. Select the game "Rennsport (API)"
@@ -126,14 +127,24 @@ Only if you have a Simucube wheelbase and want Tuner's *Telemetry Force-feedback
 
 ## Checking that it works
 
-In SimHub, open *Available properties* (or use any dashboard) and look at:
+Click **Rennsport** in SimHub's left menu. If it's not there, turn it on in *Add/remove features → Rennsport telemetry → Show in left main menu* (see [step 5](#5-start-simhub-and-enable-the-plugin)). The status page refreshes twice a second and shows a green dot for each part that works:
 
-| Property | Expected |
+| Row | Green when |
 |---|---|
-| `RennsportPlugin.Connected` | `True` while the game is running (with the UDP API enabled) |
-| `RennsportPlugin.Driving` | `True` while you are on track |
-| `DataCorePlugin.GameRunning` | `True` while driving, with "Rennsport (API)" selected |
-| `DataCorePlugin.GameData.Rpms`, `.Gear`, `.SpeedKmh` | live values |
+| Rennsport | the game process is running |
+| Game API | the game answers on its UDP API (shows the address and the last RegisterClient answer) |
+| Physics | physics arrives (only while you are on track), about 400 packets/s |
+| SimHub game | "Rennsport (API)" is the selected game |
+| Dashboards / LEDs | the plugin feeds the "Rennsport (API)" game |
+| Simucube Tuner | Tuner is running and the feed is sending (optional, grey is fine without Tuner) |
+
+When a row is orange or red, its text says what to do. The **Open SimHub log** button opens the log file.
+
+### Test without the game
+
+Click **Start test** on the plugin's page. The plugin then plays a built-in recording (about 2.5 minutes of driving at Monza, in a loop) instead of reading the game, so you can set up dashboards, LEDs, ShakeIt or Simucube Tuner without driving. Select **"Rennsport (API)"** as the game in SimHub to see the data. The *Rennsport* row turns orange while the test runs, and physics arrives at about 30 packets/s (the game sends 400). Click **Stop test** to read the game again. Restarting SimHub or switching the game also stops the test.
+
+The same values are available as properties, for example in SimHub's *Available properties* page or in a dashboard: `RennsportPlugin.Connected`, `RennsportPlugin.Driving`, `DataCorePlugin.GameRunning`, `DataCorePlugin.GameData.Rpms`.
 
 The plugin writes status lines prefixed with `[Rennsport]` to SimHub's log (`<SimHub folder>\Logs\SimHub.txt`), for example:
 
@@ -190,7 +201,7 @@ Notes:
 
 - Tuner shows *Car: Not supported*. This is expected, because the Forza format carries no car identity.
 - Rennsport does not report kerbs or surface rumble, and the axis directions are not verified yet. If *Cornering* pulls the wrong way or an effect feels wrong, lower or disable it in Tuner.
-- To skip this step, answer **N** in the installer or run `install.ps1 -SkipSimucube`. Without the Tuner change, the plugin's small feed to `127.0.0.1:9877` simply goes unread; to turn it off completely, set `FeedSimucube` to `false` (see [Settings](#settings)). `uninstall.cmd` restores Tuner's stock Rennsport entry.
+- To skip this step, answer **N** in the installer or run `install.ps1 -SkipSimucube`. Without the Tuner change, the plugin's small feed to `127.0.0.1:9877` simply goes unread; to turn it off completely, switch off *Simucube Tuner → Enabled* on the plugin's page (see [Settings](#settings)). `uninstall.cmd` restores Tuner's stock Rennsport entry.
 
 **Manually:** with Tuner closed, open `data\game_db.json` in the Tuner folder as Administrator. Replace `"rennsport": { "name": "Rennsport" }` with the entry that `install.ps1` writes (search for `$TunerEntry` in the script).
 
@@ -198,35 +209,41 @@ Notes:
 
 ## Settings
 
-The settings file is `<SimHub folder>\PluginsData\Common\RennsportPlugin.GeneralSettings.json`. SimHub creates it on first run. Edit it only while SimHub is closed.
+Change the settings on the plugin's page: **Rennsport** in SimHub's left menu, section *Settings*. **Save and apply** checks the values, saves them and restarts the plugin's connection right away, so you don't need to restart SimHub. **Undo changes** brings back the saved values, and **Defaults** fills in the defaults (click *Save and apply* to keep them).
+
+| Page field | File setting | Meaning |
+|---|---|---|
+| Game API → Host | `Host` | IP address of the PC running Rennsport (normally `127.0.0.1`) |
+| Game API → Port | `Port` | Game API port; `0` = read from the game's `BroadcastingSocket.json` (default 559) |
+| Game API → Password | `Password` | Game API password; empty (`null` in the file) = read from the game's `BroadcastingSocket.json` |
+| Dashboards / LEDs → Enabled | `FeedGameData` | Off = custom `RennsportPlugin.*` properties only, no data for the "Rennsport (API)" game |
+| Dashboards / LEDs → Port | `ExternalSimPort` | Local port used to pass data to the "Rennsport (API)" game; change it only if 30559 is taken |
+| Simucube Tuner → Enabled | `FeedSimucube` | Off = don't send the Forza-format feed for Simucube Tuner |
+| Simucube Tuner → Port | `SimucubePort` | Port of Tuner's reader; must match `port` in Tuner's `game_db.json` entry (the installer writes 9877) |
+
+The settings are stored in `<SimHub folder>\PluginsData\Common\RennsportPlugin.GeneralSettings.json`. You can also edit this file by hand, but only while SimHub is closed:
 
 ```json
 {"Host":"127.0.0.1","Port":0,"Password":null,"FeedGameData":true,"ExternalSimPort":30559,"FeedSimucube":true,"SimucubePort":9877}
 ```
 
-| Setting | Meaning |
-|---|---|
-| `Host` | Address of the PC running Rennsport (normally `127.0.0.1`) |
-| `Port` | Game API port; `0` = read from the game's `BroadcastingSocket.json` (default 559) |
-| `Password` | Game API password; `null` = read from the game's `BroadcastingSocket.json` |
-| `FeedGameData` | `false` = custom `RennsportPlugin.*` properties only, no "Rennsport (API)" game |
-| `ExternalSimPort` | Local port used to pass data to the "Rennsport (API)" game; change it only if 30559 is taken |
-| `FeedSimucube` | `false` = don't send the Forza-format feed for Simucube Tuner |
-| `SimucubePort` | Port of Tuner's reader; must match `port` in Tuner's `game_db.json` entry (the installer writes 9877) |
-
 ---
 
 ## Troubleshooting
 
+Rows refer to the plugin's status page (**Rennsport** in SimHub's left menu).
+
 | Symptom | Fix |
 |---|---|
-| No "Rennsport (API)" game in SimHub | Check that the plugin is enabled (SimHub *Settings → Plugins*) and the DLL is unblocked (step 4). Update SimHub to 9.13+. Restart SimHub. |
-| `RennsportPlugin.Connected` stays `False` | The game's UDP API is off. Repeat step 2 with the game closed, start the game and check the in-game telemetry option. |
-| `Connected` is `True` but `Driving` is `False` | You are in a menu. Physics is sent only on track. |
-| `Driving` is `True` but dashboards / LEDs are dark | Select **"Rennsport (API)"** as the game (not a custom "Rennsport" game). Check the log for `[ExternalSimUDPReader] … started receiving valid data`. |
-| Log shows `RegisterClient -> 3` (InvalidPassword) | Set the same `accessPassword` in the game config and the plugin settings, or leave `Password` as `null`. |
-| Log shows `External sim bridge disabled` | Your SimHub version has no External Sims support. Update SimHub. |
-| Port 30559 is used by something else | Set `ExternalSimPort` to another free port with SimHub closed, then restart SimHub. |
+| No **Rennsport** entry in the left menu, but "Rennsport (API)" is in the game list | Open *Add/remove features*, find **Rennsport telemetry** and switch on **Show in left main menu**. |
+| No **Rennsport** page and no "Rennsport (API)" game in SimHub | Check that the plugin is enabled (SimHub *Settings → Plugins*) and the DLL is unblocked (step 4). Update SimHub to 9.13+. Restart SimHub. |
+| *Game API* is red or grey while the game runs | The game's UDP API is off. Repeat step 2 with the game closed, start the game and check the in-game telemetry option. |
+| *Game API* shows `3 InvalidPassword` | Set the same `accessPassword` in the game config and in *Settings → Game API → Password*, or leave the password empty so the plugin reads it from the game config. |
+| *Game API* is green but *Physics* is orange | You are in a menu. Physics is sent only on track. |
+| *SimHub game* is red | Select **"Rennsport (API)"** as the game (not a custom "Rennsport" game). |
+| *Physics* is green but dashboards / LEDs are dark | Check that *SimHub game* and *Dashboards / LEDs* are green. Check the log for `[ExternalSimUDPReader] … started receiving valid data`. |
+| *Dashboards / LEDs* says `Off` (log: `External sim bridge disabled`) | Your SimHub version has no External Sims support. Update SimHub. |
+| Port 30559 is used by something else | Set *Settings → Dashboards / LEDs → Port* to another free port and click *Save and apply*. |
 | Simucube Tuner does not show *Simulator: Rennsport* | Restart Tuner after installing. If Tuner was updated, run `install.cmd` again. |
 | Tuner shows Rennsport but Telemetry FFB does nothing | SimHub must be running with the plugin enabled, and you must be on track. Enable *Telemetry Force-feedback* on Tuner's Wheelbase page. |
 | Shift lights never light up | Max / shift RPM come from the game's timing data (`CarLiveUpdate`, 4 Hz). They appear about a second after you get on track. |
@@ -264,7 +281,7 @@ To also restore the original game config, replace `BroadcastingSocket.json` with
 |---|---|
 | `RennsportPlugin/` | The SimHub plugin (C#, .NET Framework 4.8) |
 | `packaging/` | Installer and uninstaller scripts shipped in the zip |
-| `tools/RennsportUdpSniffer/` | `rsudp`: records the game's API and replays it as a fake game ([README](tools/RennsportUdpSniffer/README.md)) |
+| `tools/RennsportUdpSniffer/` | `rsudp`: records the game's API, replays it as a fake game and cuts the test sample ([README](tools/RennsportUdpSniffer/README.md)) |
 | `tools/TunerForzaTest/` | Fake `Rennsport.exe` that feeds Simucube Tuner without the game, plus `patch-gamedb.ps1` |
 | `docs/` | [Protocol notes](docs/PROTOCOL.md) and anonymized [sample messages](docs/samples/) |
 
@@ -276,7 +293,7 @@ dotnet build RennsportPlugin -c Release -p:CopyToSimHub=true     # build and cop
 pwsh -File build-dist.ps1                                        # dist/RennsportSimHub-<version>.zip
 ```
 
-**Test without the game:**
+**Test without the game:** the quickest way is the **Start test** button on the plugin's page. It plays `RennsportPlugin/TestData/monza.rsudp.gz`, which is embedded in the DLL. This sample was cut from a full recording with `rsudp sample --in api1/api.bin --out RennsportPlugin/TestData/monza.rsudp.gz`: driving part only, PhysicsUpdate at 30 Hz, only the fields the plugin reads, 4 significant digits, ids and names anonymized. For the full 400 Hz stream, use a recording:
 
 1. Record a session once with `rsudp api --out api1`.
 2. Run `rsudp replay --in api1/api.bin --port 559 --loop`, with the game closed, and start SimHub.

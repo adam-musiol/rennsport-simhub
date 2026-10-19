@@ -1,4 +1,7 @@
 using System;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 using GameReaderCommon;
 using SimHub.Plugins;
 
@@ -25,56 +28,143 @@ namespace RennsportPlugin
     [PluginDescription("Live telemetry from Rennsport via its UDP API socket")]
     [PluginAuthor("Adam Musiol")]
     [PluginName("Rennsport telemetry")]
-    public class RennsportPlugin : IPlugin, IDataPlugin
+    public class RennsportPlugin : IPlugin, IDataPlugin, IWPFSettingsV2
     {
         private RennsportSettings _settings;
         private RennsportApiClient _client;
         private ExternalSimBridge _bridge;
+        private string _bridgeError;
         private ForzaBridge _forza;
+        private TestServer _test;
         private int _bridgeErrors, _forzaErrors;
 
         public PluginManager PluginManager { get; set; }
 
+        // ---------------- status page (StatusControl) ----------------
+
+        public string LeftMenuTitle => "Rennsport";
+        public ImageSource PictureIcon => MenuIcon.Value;
+        public Control GetWPFSettingsControl(PluginManager pluginManager) => new StatusControl(this);
+
+        internal RennsportSettings Settings => _settings;
+        internal RennsportApiClient Client => _client;
+        internal bool GameDataFeedActive => _bridge != null;
+        internal string GameDataFeedError => _bridgeError;
+        internal string CurrentGameName => PluginManager?.GameName;
+        internal bool SimHubGameRunning => PluginManager?.LastData?.GameRunning ?? false;
+        internal bool TestRunning => _test != null;
+
+        // Material Design "speedometer" icon, white on transparent 24x24
+        private static readonly Lazy<ImageSource> MenuIcon = new Lazy<ImageSource>(() =>
+        {
+            var drawing = new DrawingGroup();
+            drawing.Children.Add(new GeometryDrawing(Brushes.Transparent, null, new RectangleGeometry(new Rect(0, 0, 24, 24))));
+            drawing.Children.Add(new GeometryDrawing(Brushes.White, null, Geometry.Parse(
+                "M12,16A3,3 0 0,1 9,13C9,11.88 9.61,10.9 10.5,10.39L20.21,4.77L14.68,14.35C14.18,15.33 13.17,16 12,16" +
+                "M12,3C13.81,3 15.5,3.5 16.97,4.32L14.87,5.53C14,5.19 13,5 12,5A8,8 0 0,0 4,13C4,15.21 4.89,17.21 6.34,18.65" +
+                "C6.73,19.04 6.73,19.67 6.34,20.06C5.95,20.45 5.32,20.45 4.93,20.07C3.12,18.26 2,15.76 2,13A10,10 0 0,1 12,3" +
+                "M22,13C22,15.76 20.88,18.26 19.07,20.07C18.68,20.45 18.05,20.45 17.66,20.06C17.27,19.67 17.27,19.04 17.66,18.65" +
+                "C19.11,17.2 20,15.21 20,13C20,12 19.81,11 19.46,10.1L20.67,8C21.5,9.5 22,11.18 22,13Z")));
+            var image = new DrawingImage(drawing);
+            image.Freeze();
+            return image;
+        });
+
         public void Init(PluginManager pluginManager)
         {
             _settings = this.ReadCommonSettings("GeneralSettings", () => new RennsportSettings());
+            StartComponents();
+            RegisterProperties();
+        }
 
-            bool hasCfg = RennsportApiClient.TryReadGameConfig(out int cfgPort, out string cfgPassword);
-            int port = _settings.Port > 0 ? _settings.Port : cfgPort;
-            string password = _settings.Password ?? cfgPassword;
-            Log(hasCfg ? $"Game config: {RennsportApiClient.GameConfigPath}" : "Game config not found, using defaults");
+        /// <summary>Saves new settings (from the status page) and restarts the client and both bridges with them.</summary>
+        internal void ApplySettings(RennsportSettings settings)
+        {
+            Log("Settings changed, restarting");
+            StopComponents();
+            _settings = settings;
+            this.SaveCommonSettings("GeneralSettings", _settings);
+            StartComponents();
+        }
 
-            _client = new RennsportApiClient(_settings.Host, port, password, Log);
+        /// <summary>Test mode: the client reads the built-in Monza sample from a local fake game API instead of the game.</summary>
+        internal void StartTest()
+        {
+            if (_test != null) return;
+            var test = new TestServer(Log);   // loads the sample first, so a failure leaves the plugin untouched
+            StopComponents();
+            _test = test;
+            _test.Start();
+            StartComponents();
+        }
+
+        internal void StopTest()
+        {
+            if (_test == null) return;
+            StopComponents();
+            _test.Dispose();
+            _test = null;
+            Log("Test mode stopped");
+            StartComponents();
+        }
+
+        private void StartComponents()
+        {
+            RennsportApiClient client;
+            if (_test != null)
+                client = new RennsportApiClient("127.0.0.1", _test.Port, "", Log);
+            else
+            {
+                bool hasCfg = RennsportApiClient.TryReadGameConfig(out int cfgPort, out string cfgPassword);
+                int port = _settings.Port > 0 ? _settings.Port : cfgPort;
+                string password = _settings.Password ?? cfgPassword;
+                Log(hasCfg ? $"Game config: {RennsportApiClient.GameConfigPath}" : "Game config not found, using defaults");
+                client = new RennsportApiClient(_settings.Host, port, password, Log);
+            }
+
+            _bridgeError = null;
+            _bridgeErrors = _forzaErrors = 0;
             if (_settings.FeedGameData)
             {
                 try
                 {
                     _bridge = new ExternalSimBridge(_settings.ExternalSimPort, Log);
                 }
-                catch (Exception ex) { Log("External sim bridge disabled: " + ex.Message); }
+                catch (Exception ex) { _bridgeError = ex.Message; Log("External sim bridge disabled: " + ex.Message); }
             }
             if (_settings.FeedSimucube)
             {
                 _forza = new ForzaBridge(_settings.SimucubePort);
                 Log($"Simucube Tuner feed (Forza format) -> 127.0.0.1:{_settings.SimucubePort}");
             }
-            _client.PhysicsParsed = OnPhysics;
-            RegisterProperties();
-            _client.Start();
+            client.PhysicsParsed = p => OnPhysics(client, p);
+            _client = client;
+            client.Start();
+        }
+
+        private void StopComponents()
+        {
+            _client?.Dispose();   // joins the receive thread, so OnPhysics no longer runs
+            _bridge?.Dispose();
+            _forza?.Dispose();
+            _bridge = null;
+            _forza = null;
         }
 
         // receive thread, ~100 Hz; each bridge throttles itself
-        private void OnPhysics(PhysicsSnapshot p)
+        private void OnPhysics(RennsportApiClient client, PhysicsSnapshot p)
         {
-            var car = _client.GetCar(p.DriverNumber);
-            if (_bridge != null)
+            var car = client.GetCar(p.DriverNumber);
+            var bridge = _bridge;
+            if (bridge != null)
             {
-                try { _bridge.Send(p, car, _client.Stage); }
+                try { bridge.Send(p, car, client.Stage); }
                 catch (Exception ex) { if (++_bridgeErrors <= 3) Log("External sim send failed: " + ex.Message); }
             }
-            if (_forza != null)
+            var forza = _forza;
+            if (forza != null)
             {
-                try { _forza.Send(p, car); }
+                try { forza.Send(p, car); }
                 catch (Exception ex) { if (++_forzaErrors <= 3) Log("Simucube feed send failed: " + ex.Message); }
             }
         }
@@ -87,9 +177,9 @@ namespace RennsportPlugin
 
         public void End(PluginManager pluginManager)
         {
-            _client?.Dispose();
-            _bridge?.Dispose();
-            _forza?.Dispose();
+            StopComponents();
+            _test?.Dispose();
+            _test = null;
             this.SaveCommonSettings("GeneralSettings", _settings);
         }
 

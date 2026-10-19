@@ -170,7 +170,7 @@ internal static class ReplayMode
     // ---------------- recording ----------------
 
     /// <summary>Streams packets (markers skipped) so a 500 MB recording is not loaded into memory.</summary>
-    private static IEnumerable<(long timeUs, byte[] data)> ReadPackets(string path)
+    internal static IEnumerable<(long timeUs, byte[] data)> ReadPackets(string path)
     {
         using var r = new BinaryReader(new BufferedStream(File.OpenRead(path), 1 << 20));
         if (Encoding.ASCII.GetString(r.ReadBytes(8)) != RecordingWriter.Magic)
@@ -210,7 +210,7 @@ internal static class ReplayMode
     // ---------------- messages ----------------
 
     /// <summary>messageType is the first property of every message, so only the first tokens are read.</summary>
-    private static string? PeekType(byte[] data)
+    internal static string? PeekType(byte[] data)
     {
         if (data.Length == 0 || data[0] != (byte)'{') return null;
         try

@@ -40,6 +40,14 @@ This plays the recording back to any registered client, paced by its timestamps.
 - `--speed` changes the playback speed.
 - Port 559 belongs to the game, so close Rennsport first.
 
+## Test sample for the plugin (`sample`)
+
+```
+rsudp sample --in api1/api.bin --out RennsportPlugin/TestData/monza.rsudp.gz [--hz 30] [--digits 4] [--seconds N]
+```
+
+This cuts the sample that the plugin's **Start test** button plays (it is embedded in the plugin DLL). It keeps only the driving part, puts the entry list and stage info at the start, shortens pauses to 1 s and keeps PhysicsUpdate at `--hz`. PhysicsUpdate keeps only the fields the plugin reads, and numbers are rounded to `--digits` significant digits (times and lap distance stay exact). User and car IDs and driver names are replaced with `Example Driver`. The output is a gzip-compressed recording in the same format as `api.bin`. The defaults give about 1.5 MB for 2.5 minutes.
+
 ## Raw UDP capture and analysis
 
 These tools were used before the API was found. They work for any game.

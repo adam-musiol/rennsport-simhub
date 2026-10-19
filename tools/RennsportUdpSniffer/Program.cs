@@ -28,6 +28,7 @@ internal static class Program
                 "record" => ScanMode.Run(opts, record: true),
                 "api" => ApiMode.Run(opts),
                 "replay" => ReplayMode.Run(opts),
+                "sample" => SampleMode.Run(opts),
                 "listen" => ListenMode.Run(opts),
                 "analyze" => AnalyzeMode.Run(opts),
                 "config" => ConfigSearch.Run(opts),
@@ -63,6 +64,8 @@ internal static class Program
             Answers RegisterClient / RequestUpdate like the game. Waits for the first client unless --no-wait.
             Silent stretches (menu) longer than --max-gap seconds are shortened; --start skips into the recording.
             Port 559 is the game's port - close Rennsport first.
+          rsudp sample --in api1/api.bin --out RennsportPlugin/TestData/monza.rsudp.gz [--hz 30] [--digits 4] [--seconds N]
+            Cuts the plugin's built-in test sample: driving only, compact, anonymized, gzip.
 
         record everything, hands-free (needs Administrator, Windows only):
           rsudp record [--out folder]

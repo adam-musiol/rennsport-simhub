@@ -6,7 +6,7 @@
     <AssemblyName>RennsportPlugin</AssemblyName>
     <RootNamespace>RennsportPlugin</RootNamespace>
     <Nullable>disable</Nullable>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <Product>Rennsport telemetry for SimHub</Product>
     <Authors>Adam Musiol</Authors>
     <Company>Adam Musiol</Company>
@@ -35,6 +35,11 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsBase" />
     <Reference Include="System.Xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Test mode sample. Regenerate with "rsudp sample" (see README, Development). -->
+    <EmbeddedResource Include="TestData\monza.rsudp.gz" LogicalName="RennsportPlugin.TestData.monza.rsudp.gz" />
   </ItemGroup>
 
   <Target Name="CopyPluginToSimHub" AfterTargets="Build" Condition="'$(CopyToSimHub)' == 'true'">
