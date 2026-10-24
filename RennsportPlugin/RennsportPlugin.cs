@@ -17,6 +17,7 @@ namespace RennsportPlugin
         public int ExternalSimPort = ExternalSimBridge.DefaultPort;
         public bool FeedSimucube = true; // Forza-format packets for Simucube Tuner's Telemetry FFB (needs patched game_db.json)
         public int SimucubePort = ForzaBridge.DefaultPort;
+        public bool BlockBuiltInGame = true; // stop SimHub's own "Rennsport" game from taking over on auto-detect
     }
 
     /// <summary>
@@ -121,6 +122,8 @@ namespace RennsportPlugin
                 Log(hasCfg ? $"Game config: {RennsportApiClient.GameConfigPath}" : "Game config not found, using defaults");
                 client = new RennsportApiClient(_settings.Host, port, password, Log);
             }
+
+            Log(BuiltInGameBlocker.Apply(_settings.BlockBuiltInGame));
 
             _bridgeError = null;
             _bridgeErrors = _forzaErrors = 0;

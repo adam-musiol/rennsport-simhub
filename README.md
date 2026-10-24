@@ -1,12 +1,14 @@
 # Rennsport telemetry for SimHub
 
-SimHub has no built-in support for **Rennsport**. This plugin reads Rennsport's live telemetry and feeds it into SimHub, so that:
+This plugin reads **Rennsport**'s live telemetry and feeds it into SimHub, so that:
 
 - **stock dashboards, RPM / shift LEDs and ShakeIt** work, through SimHub's normalized `GameData`,
 - about 150 extra `RennsportPlugin.*` properties are available for custom dashboards (tyres, brakes, suspension, aero, aids…), and
 - optionally, **Simucube Tuner's Telemetry FFB** works with Rennsport (see [Simucube Tuner](#simucube-tuner-telemetry-ffb)).
 
 Tested with **SimHub 9.13.2**, **Simucube Tuner 3.2.0** and the current Rennsport build (October 2026).
+
+Newer SimHub versions also have a built-in game called **"Rennsport"** (it reads the game's shared memory). Both games are detected by the same `Rennsport.exe` process. With automatic game switching on, SimHub would keep switching from "Rennsport (API)" to the built-in game, so the plugin stops SimHub from detecting the built-in game. You can turn this off with *Settings → Dashboards / LEDs → Block built-in*.
 
 **⬇ Download:** [latest release](https://github.com/adam-musiol/rennsport-simhub/releases/latest) (`RennsportSimHub-<version>.zip`), then follow [Quick install](#quick-install-recommended).
 
@@ -113,6 +115,7 @@ Files from a downloaded zip are marked as coming from the internet, and SimHub m
 Choose **Rennsport (API)** as the current game in SimHub.
 
 - If you created a *custom game* called "Rennsport" in SimHub earlier, **don't use it**. It receives no telemetry.
+- Don't pick SimHub's built-in game **"Rennsport"** (without "(API)") either. The plugin doesn't feed it.
 - Optional: with SimHub's automatic game switching enabled, SimHub switches to "Rennsport (API)" by itself when `Rennsport.exe` starts.
 
 ### 7. Drive
@@ -218,13 +221,14 @@ Change the settings on the plugin's page: **Rennsport** in SimHub's left menu, s
 | Game API → Password | `Password` | Game API password; empty (`null` in the file) = read from the game's `BroadcastingSocket.json` |
 | Dashboards / LEDs → Enabled | `FeedGameData` | Off = custom `RennsportPlugin.*` properties only, no data for the "Rennsport (API)" game |
 | Dashboards / LEDs → Port | `ExternalSimPort` | Local port used to pass data to the "Rennsport (API)" game; change it only if 30559 is taken |
+| Dashboards / LEDs → Block built-in | `BlockBuiltInGame` | On = SimHub doesn't detect its built-in "Rennsport" game, so automatic game switching picks "Rennsport (API)". Only changes SimHub's behaviour while it runs; no SimHub files are changed |
 | Simucube Tuner → Enabled | `FeedSimucube` | Off = don't send the Forza-format feed for Simucube Tuner |
 | Simucube Tuner → Port | `SimucubePort` | Port of Tuner's reader; must match `port` in Tuner's `game_db.json` entry (the installer writes 9877) |
 
 The settings are stored in `<SimHub folder>\PluginsData\Common\RennsportPlugin.GeneralSettings.json`. You can also edit this file by hand, but only while SimHub is closed:
 
 ```json
-{"Host":"127.0.0.1","Port":0,"Password":null,"FeedGameData":true,"ExternalSimPort":30559,"FeedSimucube":true,"SimucubePort":9877}
+{"Host":"127.0.0.1","Port":0,"Password":null,"FeedGameData":true,"ExternalSimPort":30559,"FeedSimucube":true,"SimucubePort":9877,"BlockBuiltInGame":true}
 ```
 
 ---
@@ -241,7 +245,8 @@ Rows refer to the plugin's status page (**Rennsport** in SimHub's left menu).
 | *Game API* is red or grey while the game runs | The game's UDP API is off. Repeat step 2 with the game closed, start the game and check the in-game telemetry option. |
 | *Game API* shows `3 InvalidPassword` | Set the same `accessPassword` in the game config and in *Settings → Game API → Password*, or leave the password empty so the plugin reads it from the game config. |
 | *Game API* is green but *Physics* is orange | You are in a menu. Physics is sent only on track. |
-| *SimHub game* is red | Select **"Rennsport (API)"** as the game (not a custom "Rennsport" game). |
+| *SimHub game* is red | Select **"Rennsport (API)"** as the game (not a custom "Rennsport" game or SimHub's built-in "Rennsport"). |
+| SimHub keeps switching to its built-in "Rennsport" game | Check that *Settings → Dashboards / LEDs → Block built-in* is on. The log should show `[Rennsport] SimHub's built-in Rennsport game will not be auto-detected`. Select "Rennsport (API)" once. |
 | *Physics* is green but dashboards / LEDs are dark | Check that *SimHub game* and *Dashboards / LEDs* are green. Check the log for `[ExternalSimUDPReader] … started receiving valid data`. |
 | *Dashboards / LEDs* says `Off` (log: `External sim bridge disabled`) | Your SimHub version has no External Sims support. Update SimHub. |
 | Port 30559 is used by something else | Set *Settings → Dashboards / LEDs → Port* to another free port and click *Save and apply*. |

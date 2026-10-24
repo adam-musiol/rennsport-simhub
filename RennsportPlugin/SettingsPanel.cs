@@ -16,7 +16,7 @@ namespace RennsportPlugin
         private readonly RennsportPlugin _plugin;
         private readonly TextBox _host = Input(), _port = Input(), _externalSimPort = Input(), _simucubePort = Input();
         private readonly PasswordBox _password = new PasswordBox { Width = 180, Margin = new Thickness(0, 3, 12, 3), VerticalAlignment = VerticalAlignment.Center };
-        private readonly CheckBox _feedGameData = Toggle(), _feedSimucube = Toggle();
+        private readonly CheckBox _feedGameData = Toggle(), _blockBuiltInGame = Toggle(), _feedSimucube = Toggle();
         private readonly TextBlock _message = new TextBlock { Margin = new Thickness(0, 8, 0, 0), TextWrapping = TextWrapping.Wrap };
 
         public SettingsPanel(RennsportPlugin plugin)
@@ -36,6 +36,7 @@ namespace RennsportPlugin
             AddHeader(grid, "Dashboards / LEDs");
             AddRow(grid, "Enabled", _feedGameData, "Feed the \"Rennsport (API)\" game (stock dashboards, LEDs, ShakeIt). Off = only RennsportPlugin.* properties");
             AddRow(grid, "Port", _externalSimPort, "Local port for the \"Rennsport (API)\" game; change it only if 30559 is taken");
+            AddRow(grid, "Block built-in", _blockBuiltInGame, "Stop SimHub's own \"Rennsport\" game from being auto-detected, so automatic game switching picks \"Rennsport (API)\"");
 
             AddHeader(grid, "Simucube Tuner (optional)");
             AddRow(grid, "Enabled", _feedSimucube, "Send the feed for Tuner's Telemetry FFB. Harmless without Tuner");
@@ -61,6 +62,7 @@ namespace RennsportPlugin
             _password.Password = s.Password ?? "";
             _feedGameData.IsChecked = s.FeedGameData;
             _externalSimPort.Text = s.ExternalSimPort.ToString();
+            _blockBuiltInGame.IsChecked = s.BlockBuiltInGame;
             _feedSimucube.IsChecked = s.FeedSimucube;
             _simucubePort.Text = s.SimucubePort.ToString();
         }
@@ -72,6 +74,7 @@ namespace RennsportPlugin
                 Host = _host.Text.Trim(),
                 Password = _password.Password.Length > 0 ? _password.Password : null,
                 FeedGameData = _feedGameData.IsChecked == true,
+                BlockBuiltInGame = _blockBuiltInGame.IsChecked == true,
                 FeedSimucube = _feedSimucube.IsChecked == true,
             };
             if (!IPAddress.TryParse(s.Host, out _)) { Error("Host must be an IP address, for example 127.0.0.1."); return; }
