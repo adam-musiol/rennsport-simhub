@@ -6,7 +6,7 @@
     <AssemblyName>RennsportPlugin</AssemblyName>
     <RootNamespace>RennsportPlugin</RootNamespace>
     <Nullable>disable</Nullable>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
     <Product>Rennsport telemetry for SimHub</Product>
     <Authors>Adam Musiol</Authors>
     <Company>Adam Musiol</Company>
